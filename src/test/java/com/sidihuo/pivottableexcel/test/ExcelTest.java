@@ -1,6 +1,5 @@
 package com.sidihuo.pivottableexcel.test;
 
-import com.alibaba.excel.EasyExcel;
 import com.sidihuo.pivottable.PivotTableBuilder;
 import com.sidihuo.pivottable.PivotTableInput;
 import com.sidihuo.pivottable.PivotTableOutput;
@@ -26,14 +25,19 @@ import java.util.List;
  */
 public class ExcelTest {
 
-    public static void main(String[] args) {
-        File file = new File("C:\\Users\\yanggangjie\\Desktop\\pivot_source3.xlsx");
+    public static void main(String[] args) throws Exception {
+        String path="C:\\Users\\yanggangjie\\Desktop\\pivot_source3.xlsx";
+//        File file = new File(path);
         List<InputDataRow> rows = new ArrayList<InputDataRow>();
         List<InputDataColumnHeader> headers = new ArrayList<InputDataColumnHeader>();
-        ExcelImportListener excelImportListener = new ExcelImportListener();
+//        ExcelImportListener excelImportListener = new ExcelImportListener();
+//        excelImportListener.setRows(rows);
+//        excelImportListener.setHeaders(headers);
+//        EasyExcel.read(file, excelImportListener).sheet(1).doRead();
+        PoiExcelReader excelImportListener = new PoiExcelReader();
         excelImportListener.setRows(rows);
         excelImportListener.setHeaders(headers);
-        EasyExcel.read(file, excelImportListener).sheet(1).doRead();
+        excelImportListener.redExcel(path);
 
         PivotTableInput pivotTableInput = new PivotTableInput();
         pivotTableInput.setRows(rows);
