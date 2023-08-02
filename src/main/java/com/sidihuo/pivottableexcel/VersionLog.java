@@ -7,6 +7,6 @@ package com.sidihuo.pivottableexcel;
  */
 public class VersionLog {
 
-    public static String JAR_BUILD_TIME = "2023-0801-1900";
+    public static String JAR_BUILD_TIME = "2023-0802-1513";
 
 }
