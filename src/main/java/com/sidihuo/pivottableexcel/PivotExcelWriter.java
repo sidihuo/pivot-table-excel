@@ -14,13 +14,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @Description
@@ -29,10 +23,10 @@ import java.util.Set;
  */
 @Slf4j
 public class PivotExcelWriter {
-    public static void write(PivotTableOutput pivotTableOutput,XSSFWorkbook xSSFWorkbook,String sheetName) {
+    public static void write(PivotTableOutput pivotTableOutput, XSSFWorkbook xSSFWorkbook, String sheetName) {
         log.info("begin write PivotExcel {}", VersionLog.JAR_BUILD_TIME);
         try {
-            doWrite(pivotTableOutput,xSSFWorkbook,sheetName);
+            doWrite(pivotTableOutput, xSSFWorkbook, sheetName);
         } catch (Throwable t) {
             log.warn("write PivotExcel failed {}", VersionLog.JAR_BUILD_TIME, t);
             if (t instanceof PivotTableException) {
@@ -45,7 +39,7 @@ public class PivotExcelWriter {
     }
 
 
-    private static void doWrite(PivotTableOutput pivotTableOutput,XSSFWorkbook xSSFWorkbook,String sheetName) {
+    private static void doWrite(PivotTableOutput pivotTableOutput, XSSFWorkbook xSSFWorkbook, String sheetName) {
 
 
         XSSFWorkbook wb = xSSFWorkbook;
@@ -65,16 +59,30 @@ public class PivotExcelWriter {
         List<Integer> rowIndexHeaderList = new ArrayList<Integer>(rowIndexHeaderSet);
         Collections.sort(rowIndexHeaderList);
         List<String> rowHeaders = headerRow.getRowHeaders();
+        List<String> originColumnHeaders = headerRow.getOriginColumnHeaders();
         int rowIndex = 0;
+        int rowHeaderBottomIndex = rowIndexHeaderList.size() - 1;
         for (Integer integer : rowIndexHeaderList) {
             Row rowTemp = sheet1.createRow(rowIndex++);
-            int columnIndex = 0;
-            for (String rowHeader : rowHeaders) {
-                Cell cell = rowTemp.createCell(columnIndex++);
-                cell.setCellValue(rowHeader);
-            }
-            List<String> strings = integerListMap.get(integer);
             int rowNum = rowTemp.getRowNum();
+            int columnIndex = 0;
+            if (rowHeaderBottomIndex < rowNum) {
+                //左上角非底表头显示列表头，并且横向合并单元格
+                for (String rowHeader : rowHeaders) {
+                    Cell cell = rowTemp.createCell(columnIndex++);
+                    String s = originColumnHeaders.get(rowIndex - 1);
+                    cell.setCellValue(s);
+                }
+                sheet1.addMergedRegion(new CellRangeAddress(rowNum, rowNum, 0, columnIndex - 1));
+            } else if (rowHeaderBottomIndex == rowNum) {
+                //左上角非表头显示行表头
+                for (String rowHeader : rowHeaders) {
+                    Cell cell = rowTemp.createCell(columnIndex++);
+                    cell.setCellValue(rowHeader);
+                }
+            }
+
+            List<String> strings = integerListMap.get(integer);
             int columnMergedFirst = 0;
             int columnMergedLast = 0;
             String columnMergedCurrent = null;
