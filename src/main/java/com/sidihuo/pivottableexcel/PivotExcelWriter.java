@@ -66,7 +66,7 @@ public class PivotExcelWriter {
             Row rowTemp = sheet1.createRow(rowIndex++);
             int rowNum = rowTemp.getRowNum();
             int columnIndex = 0;
-            if (rowHeaderBottomIndex < rowNum) {
+            if (rowNum < rowHeaderBottomIndex) {
                 //左上角非底表头显示列表头，并且横向合并单元格
                 for (String rowHeader : rowHeaders) {
                     Cell cell = rowTemp.createCell(columnIndex++);
@@ -115,13 +115,13 @@ public class PivotExcelWriter {
             }
         }
 
-        int rowMergedFirst = 0;
-        int rowMergedLast = rowIndexHeaderList.size() - 1;
-        int columnMergedCurrent = 0;
-        for (String rowHeader : rowHeaders) {
-            sheet1.addMergedRegion(new CellRangeAddress(rowMergedFirst, rowMergedLast, columnMergedCurrent, columnMergedCurrent));
-            columnMergedCurrent++;
-        }
+//        int rowMergedFirst = 0;
+//        int rowMergedLast = rowIndexHeaderList.size() - 1;
+//        int columnMergedCurrent = 0;
+//        for (String rowHeader : rowHeaders) {
+//            sheet1.addMergedRegion(new CellRangeAddress(rowMergedFirst, rowMergedLast, columnMergedCurrent, columnMergedCurrent));
+//            columnMergedCurrent++;
+//        }
 
 
         List<OutputDataRow> dataRows = pivotTableOutput.getDataRows();
@@ -159,7 +159,23 @@ public class PivotExcelWriter {
                 for (int columnIndex = size - 1; columnIndex >= 0; columnIndex--) {
                     String last = rowHeaderValuesMergeCurrentValue.get(columnIndex);
                     String current = rowHeaderValues.get(columnIndex);
-                    if (StringUtils.equals(last, current)) {
+
+                    boolean needMerge = true;
+                    boolean equals = StringUtils.equals(last, current);
+                    if (equals) {
+                        //当前列相同，要前面的列都相同菜肴合并
+                        for (int i = 0; i < columnIndex; i++) {
+                            String lastTemp = rowHeaderValuesMergeCurrentValue.get(i);
+                            String currentTemp = rowHeaderValues.get(i);
+                            if (!StringUtils.equals(lastTemp, currentTemp)) {
+                                needMerge = false;
+                                break;
+                            }
+                        }
+                    } else {
+                        needMerge = false;
+                    }
+                    if (needMerge) {
                     } else {
                         rowHeaderValuesMergeCurrentValue.set(columnIndex, current);
                         int mergeRowFirst = rowHeaderValuesMergeCurrentRowFirst.get(columnIndex);
